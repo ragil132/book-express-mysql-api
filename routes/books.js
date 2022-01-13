@@ -3,9 +3,9 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const connection = require('../lib/database');
 
-router.get('/', function (req, res) {
+router.get('/books', function (req, res) {
 
-    connection.query('SELECT * FROM posts ORDER BY id desc', function (err, rows) {
+    connection.query('SELECT * FROM books ORDER BY id desc', function (err, rows) {
         if (err) {
             return res.status(500).json({
                 status: false,
@@ -14,14 +14,14 @@ router.get('/', function (req, res) {
         } else {
             return res.status(200).json({
                 status: true,
-                message: 'List Data Posts',
+                message: 'List Data Books',
                 data: rows
             })
         }
     });
 });
 
-router.post('/store', [
+router.post('/books', [
 
     body('title').notEmpty(),
     body('content').notEmpty()
@@ -41,7 +41,7 @@ router.post('/store', [
         content: req.body.content
     }
 
-    connection.query('INSERT INTO posts SET ?', formData, function (err, rows) {
+    connection.query('INSERT INTO books SET ?', formData, function (err, rows) {
 
         if (err) {
             return res.status(500).json({
@@ -59,11 +59,11 @@ router.post('/store', [
 
 });
 
-router.get('/(:id)', function (req, res) {
+router.get('/books/(:id)', function (req, res) {
 
     let id = req.params.id;
 
-    connection.query(`SELECT * FROM posts WHERE id = ${id}`, function (err, rows) {
+    connection.query(`SELECT * FROM books WHERE id = ${id}`, function (err, rows) {
 
         if (err) {
             return res.status(500).json({
@@ -75,20 +75,20 @@ router.get('/(:id)', function (req, res) {
         if (rows.length <= 0) {
             return res.status(404).json({
                 status: false,
-                message: 'Post Not Found!',
+                message: 'Book Not Found!',
             })
         }
         else {
             return res.status(200).json({
                 status: true,
-                message: `Detail Data Post with id = ${id}`,
+                message: `Detail Data Book with id = ${id}`,
                 data: rows[0]
             })
         }
     })
 })
 
-router.patch('/update/:id', [
+router.patch('/books/:id', [
 
     body('title').notEmpty(),
     body('content').notEmpty()
@@ -110,49 +110,81 @@ router.patch('/update/:id', [
         content: req.body.content
     }
 
-    connection.query(`UPDATE posts SET ? WHERE id = ${id}`, formData, function (err, rows) {
+    connection.query(`SELECT * FROM books WHERE id = ${id}`, function (err, rows) {
 
         if (err) {
             return res.status(500).json({
                 status: false,
                 message: 'Internal Server Error',
             })
-        } else {
-            return res.status(200).json({
-                status: true,
-                message: 'Data updated!'
+        }
+
+        if (rows.length <= 0) {
+            return res.status(404).json({
+                status: false,
+                message: 'Book Not Found!',
+            })
+        }
+        else {
+            connection.query(`UPDATE books SET ? WHERE id = ${id}`, formData, function (err, rows) {
+
+                if (err) {
+                    return res.status(500).json({
+                        status: false,
+                        message: 'Internal Server Error',
+                    })
+                }
+                else {
+                    return res.status(200).json({
+                        status: true,
+                        message: 'Data updated!'
+                    })
+                }
             })
         }
     })
 
 });
 
-router.delete('/delete/(:id)', function (req, res) {
+router.delete('/books/(:id)', function (req, res) {
 
     let id = req.params.id;
 
-    connection.query(`DELETE FROM posts WHERE id = ${id}`, function (err, rows) {
+    connection.query(`SELECT * FROM books WHERE id = ${id}`, function (err, rows) {
 
         if (err) {
             return res.status(500).json({
                 status: false,
                 message: 'Internal Server Error',
             })
-        } else {
-            if (rows.length <= 0) {
-                return res.status(404).json({
-                    status: false,
-                    message: 'Post not found'
-                })
-            }
-            else {
-                return res.status(200).json({
-                    status: true,
-                    message: 'Data Deleted!',
-                })
-            }
+        }
+
+        if (rows.length <= 0) {
+            return res.status(404).json({
+                status: false,
+                message: 'Book Not Found!',
+            })
+        }
+        else {
+            connection.query(`DELETE FROM books WHERE id = ${id}`, function (err, rows) {
+
+                if (err) {
+                    return res.status(500).json({
+                        status: false,
+                        message: 'Internal Server Error',
+                    })
+                }
+                else {
+                    return res.status(200).json({
+                        status: true,
+                        message: 'Data Deleted!',
+                    })
+                }
+
+            })
         }
     })
+
 });
 
 module.exports = router;

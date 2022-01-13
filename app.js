@@ -3,7 +3,7 @@ let express = require('express');
 let path = require('path');
 let cookieParser = require('cookie-parser');
 let logger = require('morgan');
-let postsRouter = require('./routes/posts');
+let booksRouter = require('./routes/books');
 let app = express();
 let bodyParser = require('body-parser');
 const cors = require('cors');
@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(cors());
 
-app.use('/api/posts', postsRouter);
+app.use('/api/v1', booksRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
